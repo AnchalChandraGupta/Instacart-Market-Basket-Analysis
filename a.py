@@ -2,9 +2,9 @@
 import pandas as pd
 from sklearn.cluster import KMeans
 
-location = '/home/anchal/Desktop/instacart data/'
+location = '/home/svc/abcde/instacart data/'
 
-PriorProductOrders = pd.read_csv(location + 'order_products__prior.csv')
+PriorProductOrders = pd.read_csv(location + 'order_products__prior.csv', nrows=10000)
 TrainProductOrders = pd.read_csv(location + 'order_products__train.csv')['order_id']
 print(PriorProductOrders.head(100).to_string())
 print(PriorProductOrders.shape)
@@ -42,7 +42,7 @@ user_aggregate = grouped.agg({'department_id': to_dict,
 user_aggregate.columns = ['user_id',
                           'department_count_dict',
                           'hour_of_day_count_dict',
-                          'days_since_prior_order_count_dict',
+                          'days_prior_order_count_dict',
                           'day_of_week_count_dict',
                           'reordered_count_dict'
                           ]
@@ -53,7 +53,7 @@ df = pd.DataFrame(data=None, columns=['user_id'])
 df['user_id'] = user_aggregate['user_id']
 
 for i in range(1, 22):
-    df['department_'+str(i)] = user_aggregate['department_list'].apply(lambda x: x.get(i) if x.__contains__(i) else 0)
+    df['department_'+str(i)] = user_aggregate['department_count_dict'].apply(lambda x: x.get(i) if x.__contains__(i) else 0)
 
 print('', df.head(20).to_string())
 del user_aggregate['department_count_dict']
