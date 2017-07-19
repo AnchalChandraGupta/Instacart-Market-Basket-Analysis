@@ -4,7 +4,7 @@ from sklearn.cluster import KMeans
 
 location = '/home/svc/abcde/instacart data/'
 
-PriorProductOrders = pd.read_csv(location + 'order_products__prior.csv', nrows=10000)
+PriorProductOrders = pd.read_csv(location + 'order_products__prior.csv')
 TrainProductOrders = pd.read_csv(location + 'order_products__train.csv')['order_id']
 print(PriorProductOrders.head(100).to_string())
 print(PriorProductOrders.shape)
@@ -29,48 +29,32 @@ grouped = joined.groupby('user_id', as_index=False)
 
 del joined
 
-def to_dict(x):
-    return x.value_counts().to_dict()
-
-user_aggregate = grouped.agg({'department_id': to_dict,
-                              'order_hour_of_day': to_dict,
-                              'days_since_prior_order': to_dict,
-                              'order_dow': to_dict,
-                              'reordered':to_dict
+user_aggregate = grouped.agg({'department_id': lambda x: list(x),
+                              'order_hour_of_day': lambda x: list(x),
+                              'days_since_prior_order': lambda x: list(x),
+                              'order_dow': lambda x: list(x),
+                              'reordered': lambda x: list(x)
                               })
-
-user_aggregate.columns = ['user_id',
-                          'department_count_dict',
-                          'hour_of_day_count_dict',
-                          'days_prior_order_count_dict',
-                          'day_of_week_count_dict',
-                          'reordered_count_dict'
-                          ]
-
 del grouped
 
 df = pd.DataFrame(data=None, columns=['user_id'])
 df['user_id'] = user_aggregate['user_id']
 
 for i in range(1, 22):
-    df['department_'+str(i)] = user_aggregate['department_count_dict'].apply(lambda x: x.get(i) if x.__contains__(i) else 0)
+    df['department_'+str(i)] = user_aggregate['department_id'].apply(lambda x: x.count(i))
 
 print('', df.head(20).to_string())
-del user_aggregate['department_count_dict']
-df['morning_order'] = user_aggregate['hour_of_day_count_dict'].apply(lambda x: x.get(1) if x.__contains__(1) else 0)
-df['afternoon_order'] = user_aggregate['hour_of_day_count_dict'].apply(lambda x: x.get(2) if x.__contains__(2) else 0)
-df['night_order'] = user_aggregate['hour_of_day_count_dict'].apply(lambda x: x.get(3) if x.__contains__(3) else 0)
-del user_aggregate['hour_of_day_count_dict']
-df['week_day_order'] = user_aggregate['day_of_week_count_dict'].apply(lambda x: x.get(1) if x.__contains__(1) else 0)
-df['week_end_order'] = user_aggregate['day_of_week_count_dict'].apply(lambda x: x.get(0) if x.__contains__(0) else 0)
-del user_aggregate['day_of_week_count_dict']
-df['prior_order_days_0_10'] = user_aggregate['days_prior_order_count_dict'].apply(lambda x: x.get(1) if x.__contains__(1) else 0)
-df['prior_order_days_10_20'] = user_aggregate['days_prior_order_count_dict'].apply(lambda x: x.get(2) if x.__contains__(2) else 0)
-df['prior_order_days_20_30'] = user_aggregate['days_prior_order_count_dict'].apply(lambda x: x.get(3) if x.__contains__(3) else 0)
-df['prior_order_days_30+'] = user_aggregate['days_prior_order_count_dict'].apply(lambda x: x.get(4) if x.__contains__(4) else 0)
-del user_aggregate['days_prior_order_count_dict']
-df['re_order'] = user_aggregate['reordered_count_dict'].apply(lambda x: x.get(1) if x.__contains__(1) else 0)
-df['first_time_order'] = user_aggregate['reordered_count_dict'].apply(lambda x: x.get(0) if x.__contains__(0) else 0)
+df['morning_order'] = user_aggregate['order_hour_of_day'].apply(lambda x: x.count(1))
+df['afternoon_order'] = user_aggregate['order_hour_of_day'].apply(lambda x: x.count(2))
+df['night_order'] = user_aggregate['order_hour_of_day'].apply(lambda x: x.count(3))
+df['week_day_order'] = user_aggregate['order_dow'].apply(lambda x: x.count(1))
+df['week_end_order'] = user_aggregate['order_dow'].apply(lambda x: x.count(0))
+df['prior_order_days_0_10'] = user_aggregate['days_since_prior_order'].apply(lambda x: x.count(1))
+df['prior_order_days_10_20'] = user_aggregate['days_since_prior_order'].apply(lambda x: x.count(2))
+df['prior_order_days_20_30'] = user_aggregate['days_since_prior_order'].apply(lambda x: x.count(3))
+df['prior_order_days_30+'] = user_aggregate['days_since_prior_order'].apply(lambda x: x.count(4))
+df['re_order'] = user_aggregate['reordered'].apply(lambda x: x.count(1))
+df['first_time_order'] = user_aggregate['reordered'].apply(lambda x: x.count(0))
 
 del user_aggregate
 
