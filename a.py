@@ -1,8 +1,7 @@
-
 import pandas as pd
 from sklearn.cluster import KMeans
 
-location = '/home/svc/abcde/instacart data/'
+location = '/home/anchal/PycharmProjects/instacart_data/'
 
 PriorProductOrders = pd.read_csv(location + 'order_products__prior.csv')
 TrainProductOrders = pd.read_csv(location + 'order_products__train.csv')['order_id']
@@ -62,7 +61,7 @@ print('df','\n', df.head(100).to_string(), '\n\n')
 df.to_csv(location+'df1.csv', index=False)
 print(df.shape)
 
-kmeans = KMeans(n_clusters=20).fit(df)
+kmeans = KMeans(n_clusters=200, random_state=1).fit(df)
 
 write_to_file = open(location+'kmeans_labels_.csv', 'w')
 
