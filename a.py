@@ -11,17 +11,17 @@ instacart_data_location = '/home/anchal/PycharmProjects/Instacart-Market-Basket-
 
 # print 10 records from each csv file
 
-print('\n\n\n\naisles\n\n' + pandas.read_csv(instacart_data_location + 'aisles.csv', nrows=10).head(20).to_string())
-print('\n\n\n\ndepartments\n\n' + pandas.read_csv(instacart_data_location + 'departments.csv', nrows=10).head(20).to_string())
-print('\n\n\n\norder_products__prior\n\n' + pandas.read_csv(instacart_data_location + 'order_products__prior.csv', nrows=10).head(20).to_string())
-print('\n\n\n\norder_products__train\n\n' + pandas.read_csv(instacart_data_location + 'order_products__train.csv', nrows=10).head(20).to_string())
-print('\n\n\n\norders\n\n' + pandas.read_csv(instacart_data_location + 'orders.csv', nrows=10).head(20).to_string())
-print('\n\n\n\nproducts\n\n' + pandas.read_csv(instacart_data_location + 'products.csv', nrows=10).head(20).to_string())
+print('\n\n\n\naisles\n\n' + pandas.read_csv(instacart_data_location + 'aisles.csv', nrows=20).head(20).to_string())
+print('\n\n\n\ndepartments\n\n' + pandas.read_csv(instacart_data_location + 'departments.csv', nrows=20).head(20).to_string())
+print('\n\n\n\norder_products__prior\n\n' + pandas.read_csv(instacart_data_location + 'order_products__prior.csv', nrows=20).head(20).to_string())
+print('\n\n\n\norder_products__train\n\n' + pandas.read_csv(instacart_data_location + 'order_products__train.csv', nrows=20).head(20).to_string())
+print('\n\n\n\norders\n\n' + pandas.read_csv(instacart_data_location + 'orders.csv', nrows=20).head(20).to_string())
+print('\n\n\n\nproducts\n\n' + pandas.read_csv(instacart_data_location + 'products.csv', nrows=20).head(20).to_string())
 
-prior_order_products = pandas.read_csv(instacart_data_location + 'order_products__prior.csv', nrows=1000000)
+prior_order_products = pandas.read_csv(instacart_data_location + 'order_products__prior.csv')
 training_order_products = pandas.read_csv(instacart_data_location + 'order_products__train.csv')
 
-orders = pandas.read_csv(instacart_data_location + 'orders.csv', nrows=1000000)
+orders = pandas.read_csv(instacart_data_location + 'orders.csv')
 orders['days_since_prior_order'] = orders['days_since_prior_order'].apply(lambda x: 1 if 0 <= x <= 10 else 2 if 10 < x <= 20 else 3 if 20 < x <= 30 else 4)
 orders['order_hour_of_day'] = orders['order_hour_of_day'].apply(lambda x: 1 if x < 12 else 2 if x < 17 else 3 if x < 24 else 0)
 orders['order_dow'] = orders['order_dow'].apply(lambda x: 1 if (x == 0 or x == 1 or x == 2 or x == 3 or x == 4) else 0 if(x == 5 or x == 6) else 2)
@@ -33,8 +33,7 @@ orders['order_dow'] = orders['order_dow'].apply(lambda x: 1 if (x == 0 or x == 1
 train_user_id_set = set()
 test_user_id_set = set()
 count=0
-for i in orders[['user_id']].iterrows():
-    print(i)
+for i in orders[['user_id', 'eval_set']].iterrows():
     count+=1
     if count%100000 is 0:
         print(count/100000)
@@ -97,7 +96,7 @@ del train_user_dataframe
 # X_training_reduced_data_matrix: Dataframe: training feature matrix
 # X_validation_reduced_data_matrix: Dataframe: validation feature matrix
 
-X_training_reduced_data_matrix, X_validation_reduced_data_matrix = train_test_split(reduced_data_matrix, test_size=312)
+X_training_reduced_data_matrix, X_validation_reduced_data_matrix = train_test_split(reduced_data_matrix, test_size=31209)
 del reduced_data_matrix
 print('\n\n\n\nX_training_reduced_data_matrix\n\n', X_training_reduced_data_matrix.shape)
 print('\n\n\n\nX_validation_reduced_data_matrix\n\n', X_validation_reduced_data_matrix.shape)
@@ -190,12 +189,6 @@ list3 = zip(list1, list2)
 
 list4 = list()
 for i in list3:
-    print(i[0][1])
-    print(i[1][1])
-    print(type(i[0][1]))
-    print(type(i[1][1]))
-    print(len(i[0][1]))
-    print(len(i[1][1]))
     ce=0
     s0 = set()
     for item in i[0][1]:
