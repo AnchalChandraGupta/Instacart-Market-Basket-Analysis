@@ -8,14 +8,6 @@ pd.set_option('max_colwidth', 220)
 
 location = '/home/anchal/PycharmProjects/Instacart-Market-Basket-Analysis/instacart_data/'
 
-
-print('\n\n\n\naisles\n\n' + pd.read_csv(location+'aisles.csv', nrows=10).head(10).to_string())
-print('\n\n\n\ndepartments\n\n' + pd.read_csv(location+'departments.csv', nrows=10).head(10).to_string())
-print('\n\n\n\norder_products__prior\n\n' + pd.read_csv(location+'order_products__prior.csv', nrows=10).head(10).to_string())
-print('\n\n\n\norder_products__train\n\n' + pd.read_csv(location+'order_products__train.csv', nrows=10).head(10).to_string())
-print('\n\n\n\norders\n\n' + pd.read_csv(location+'orders.csv', nrows=10).head(10).to_string())
-print('\n\n\n\nproducts\n\n' + pd.read_csv(location+'products.csv', nrows=10).head(10).to_string())
-
 prior_product_orders = pd.read_csv(location + 'order_products__prior.csv')
 train_product_orders = pd.read_csv(location + 'order_products__train.csv')
 
@@ -37,9 +29,6 @@ for i in user_orders[['user_id', 'eval_set']].iterrows():
     if str(i[1]['eval_set']).__contains__('test'):
         test_user_id_set.add(i[1]['user_id'])
 
-print('\n\n\n\ntrain_user_id_set length', len(train_user_id_set))
-print('\n\n\n\ntest_user_id_set length', len(test_user_id_set))
-
 
 training_set = random.random(train_user_id_set,100000)
 validation
@@ -52,7 +41,6 @@ del products
 
 departments = pd.read_csv(location + 'departments.csv', usecols=['department_id'])
 joined = pd.merge(joined, departments)
-print('\n\n\n\njoined    '+str(joined.shape)+'\n\n',joined.head(10).to_string())
 del departments
 
 # train_user_id_set: set contain the id of the training users
@@ -61,11 +49,6 @@ del departments
 training_user_join = joined.loc[joined['user_id'].isin(train_user_id_set)]
 test_user_join = joined.loc[joined['user_id'].isin(test_user_id_set)]
 del joined
-
-print('\n\n\n\ntraining_user_join\n\n', training_user_join.head(10).to_string())
-print('\n\n\n\ntest_user_join\n\n', test_user_join.head(10).to_string())
-
-
 
 # training users
 
@@ -94,11 +77,6 @@ del train_user_dataframe
 
 # feature matrix - each row contain feature values for 1 user       total length 131209     Number of columns (features) 32
 matrix = reduced_data_matrix.drop(['user_id'], axis=1)
-print('\n\n\n\nfeatures matrix\n\n', matrix.head(10).to_string(), '\n\n')
-print('\n\n\n\nfeature matrix dimension ', matrix.shape)
-
-
-
 
 # Kmeans fit()
 
@@ -114,15 +92,12 @@ print('\n\n\n\n kmeans labels length\n', len(kmeans.labels_))
 #add cluster values to joined table
 reduced_data_matrix['cluster_id'] = pd.DataFrame(kmeans.labels_)
 training_user_join = pd.merge(training_user_join, reduced_data_matrix[['user_id', 'cluster_id']])
-print('\n\n\n\ntraining_user_join\n\n', training_user_join.head(10).to_string())
 
 # create a list of products in each cluster using prior orders made by the users in that cluster
 cluster_product_aggregate = training_user_join.groupby(by=['cluster_id'], as_index=False).agg({'product_id': lambda x: list(x)})
-print('\n\n\n\ncluster_product_aggregate\n\n', cluster_product_aggregate.head(10).to_string())
 
 # get the top 10 products from each cluster
 cluster_product_aggregate['product_id'] = cluster_product_aggregate['product_id'].apply(lambda x: Counter(w for w in x).most_common(10))
-print('\n\n\n\ncluster_product_aggregate top 10 products for each cluster\n\n', cluster_product_aggregate.head(10).to_string())
 
 
 
@@ -153,8 +128,6 @@ del test_user_dataframe
 
 # test feature matrix - each row contain feature values for 1 user      total length 75000      Number of columns (features) 32
 test_matrix = reduced_test_data_matrix.drop(['user_id'], axis=1)
-print('\n\n\n\ntest feature matrix\n\n', test_matrix.head(10).to_string(), '\n\n')
-print('\n\n\n\ntest feature matrix dimension:', test_matrix.shape)
 
 
 
@@ -165,10 +138,6 @@ print('\n\n\n\ntest feature matrix dimension:', test_matrix.shape)
 kmeans.predict(test_matrix)
 
 test_users_predicted_clusters = kmeans.labels_
-print('\n\n\n\n kmeans labels length\n', len(kmeans.labels_))
-print('\n\n\n\ntest_users_predicted_clusters\n\n', test_users_predicted_clusters)
-# predicted_user_label_list = zip(reduced_data_matrix.user_id, kmeans.labels_)
-# predicted_user_label_list.to_csv(location + 'predicted_user_label_list.csv', index=False)
 
 reduced_test_data_matrix['cluster_id'] = pd.DataFrame(kmeans.labels_)
 a = pd.merge(cluster_product_aggregate, reduced_test_data_matrix, on='cluster_id')
@@ -201,7 +170,6 @@ for i in range(1, 135):
 for i in range(1, 22):
     training_set_output_df_matrix['department_c_' + str(i)] = user_aggregate1['department_id'].apply(lambda x: x.count(i))
 class_matrix = training_set_output_df_matrix.drop(['user_id'], axis=1)
-print('class_matrix', class_matrix.shape)
 
 
 
